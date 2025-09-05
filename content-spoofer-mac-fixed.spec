@@ -204,4 +204,22 @@ coll = COLLECT(
     name='ReelsWasher',
 )
 
+# Create Mac App Bundle
+app = BUNDLE(
+    coll,
+    name='Reels Washer.app',
+    icon=None,
+    bundle_identifier='com.reelswasher.app',
+    version='1.0.0',
+    info_plist={
+        'CFBundleDisplayName': 'Reels Washer',
+        'CFBundleName': 'Reels Washer',
+        'CFBundleVersion': '1.0.0',
+        'CFBundleShortVersionString': '1.0.0',
+        'NSRequiresAquaSystemAppearance': False,
+        'NSHighResolutionCapable': True,
+        'LSMinimumSystemVersion': '10.15.0',
+    },
+)
+
 
