@@ -34,8 +34,8 @@ jobs:
         # Clean previous builds
         rm -rf build dist *.app
         
-        # Build with the app bundle spec
-        pyinstaller --clean --noconfirm content-spoofer-mac-app.spec
+        # Build with the FIXED bundle spec (this one works!)
+        pyinstaller --clean --noconfirm content-spoofer-mac-fixed.spec
         
         # Verify build
         ls -la dist/
