@@ -1,0 +1,112 @@
+name: Build Mac App
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:  # Manual trigger button
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    
+    steps:
+    - name: 🚀 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: 🍺 Install system dependencies
+      run: |
+        brew install create-dmg ffmpeg
+    
+    - name: 📦 Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install customtkinter==5.2.0
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: 🔨 Build Mac App
+      run: |
+        # Clean previous builds
+        rm -rf build dist *.app
+        
+        # Build with the app bundle spec
+        pyinstaller --clean --noconfirm content-spoofer-mac-app.spec
+        
+        # Verify build
+        ls -la dist/
+        
+        # Test the app structure
+        if [ -d "dist/Reels Washer.app" ]; then
+          echo "✅ App bundle created successfully"
+          ls -la "dist/Reels Washer.app/Contents/"
+        else
+          echo "❌ App bundle creation failed"
+          exit 1
+        fi
+    
+    - name: 📦 Create DMG Installer
+      run: |
+        # Create professional DMG installer
+        create-dmg \
+          --volname "Reels Washer" \
+          --window-pos 200 120 \
+          --window-size 800 400 \
+          --icon-size 100 \
+          --icon "Reels Washer.app" 200 190 \
+          --hide-extension "Reels Washer.app" \
+          --app-drop-link 600 190 \
+          "Reels-Washer-Mac.dmg" \
+          "dist/Reels Washer.app" || {
+          
+          echo "⚠️ DMG creation failed, creating ZIP instead..."
+          cd dist
+          zip -r "../Reels-Washer-Mac.zip" "Reels Washer.app"
+          cd ..
+        }
+        
+        # Always create a backup ZIP
+        cd dist
+        zip -r "../Reels-Washer-Backup.zip" "Reels Washer.app"
+        cd ..
+        
+        # List created files
+        echo "📁 Created files:"
+        ls -la *.dmg *.zip 2>/dev/null || echo "No installer files found"
+    
+    - name: 📤 Upload Mac App (DMG)
+      uses: actions/upload-artifact@v3
+      if: hashFiles('*.dmg') != ''
+      with:
+        name: Reels-Washer-Mac-DMG
+        path: "*.dmg"
+    
+    - name: 📤 Upload Mac App (ZIP)
+      uses: actions/upload-artifact@v3
+      with:
+        name: Reels-Washer-Mac-ZIP
+        path: "*.zip"
+    
+    - name: 🎉 Build Summary
+      run: |
+        echo ""
+        echo "🎉 Mac App Build Complete!"
+        echo "=========================="
+        echo "📱 App Bundle: dist/Reels Washer.app"
+        if [ -f "Reels-Washer-Mac.dmg" ]; then
+          echo "💿 DMG Installer: Reels-Washer-Mac.dmg"
+        fi
+        if [ -f "Reels-Washer-Mac.zip" ]; then
+          echo "📦 ZIP File: Reels-Washer-Mac.zip"  
+        fi
+        if [ -f "Reels-Washer-Backup.zip" ]; then
+          echo "📦 Backup ZIP: Reels-Washer-Backup.zip"
+        fi
+        echo ""
+        echo "✅ Download from the 'Actions' tab artifacts"
+        echo "✅ Send the DMG or ZIP to your Mac user"
+        echo "✅ Mac user just double-clicks to install/run!"
