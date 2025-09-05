@@ -63,15 +63,25 @@ ctk_datas, ctk_hiddenimports = collect_customtkinter()
 
 # Data files to include for Mac
 datas = [
-    # FFmpeg executables (no .exe extension on Mac)
-    ('ffmpeg', '.'),
-    ('ffplay', '.'), 
-    ('ffprobe', '.'),
     # Source files
     ('src', 'src'),
     # README for reference
     ('README.md', '.'),
 ]
+
+# Find and add FFmpeg binaries dynamically
+import subprocess
+for cmd in ['ffmpeg', 'ffprobe', 'ffplay']:
+    try:
+        result = subprocess.run(['which', cmd], capture_output=True, text=True)
+        if result.returncode == 0:
+            ffmpeg_path = result.stdout.strip()
+            datas.append((ffmpeg_path, '.'))
+            print(f"✅ Found and will bundle: {cmd} at {ffmpeg_path}")
+        else:
+            print(f"⚠️  {cmd} not found - app will use system version")
+    except Exception as e:
+        print(f"⚠️  Could not locate {cmd}: {e}")
 
 # Add CustomTkinter files
 datas.extend(ctk_datas)
@@ -136,12 +146,8 @@ hiddenimports = [
 # Add collected CustomTkinter modules
 hiddenimports.extend(ctk_hiddenimports)
 
-# Binaries (external executables) for Mac
-binaries = [
-    ('ffmpeg', '.'),
-    ('ffplay', '.'),
-    ('ffprobe', '.'),
-]
+# Binaries (external executables) for Mac - populated dynamically above
+binaries = []
 
 a = Analysis(
     [main_script],
