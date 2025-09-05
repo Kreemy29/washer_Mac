@@ -79,14 +79,14 @@ jobs:
         ls -la *.dmg *.zip 2>/dev/null || echo "No installer files found"
     
     - name: 📤 Upload Mac App (DMG)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: hashFiles('*.dmg') != ''
       with:
         name: Reels-Washer-Mac-DMG
         path: "*.dmg"
     
     - name: 📤 Upload Mac App (ZIP)
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: Reels-Washer-Mac-ZIP
         path: "*.zip"
