@@ -49,6 +49,11 @@ jobs:
           exit 1
         fi
     
+    - name: 🧪 Test Mac App
+      run: |
+        # Run our comprehensive app test
+        python3 test_mac_app.py
+    
     - name: 📦 Create DMG Installer
       run: |
         # Create professional DMG installer
